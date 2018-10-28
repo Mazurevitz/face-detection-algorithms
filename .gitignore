@@ -101,3 +101,5 @@ htmlcov
 /examples/movies/movies.db
 *.orig
 CHANGELOG.temp
+.vscode/launch.json
+.vscode/settings.json
