@@ -8,8 +8,8 @@ def main():
     face_cascade = cv2.CascadeClassifier('haar/haarcascade_frontalface_alt2.xml')
     recognizer = cv2.face.EigenFaceRecognizer_create()
 
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    image_dir = os.path.join(BASE_DIR, "images")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    image_dir = os.path.join(base_dir, "images")
 
     x_train = []
     y_labels = []
