@@ -6,6 +6,7 @@ def main():
     cap = cv2.VideoCapture(0)
 
     face_cascade = cv2.CascadeClassifier('haar/haarcascade_frontalface_alt2.xml')
+    eye_cascade = cv2.CascadeClassifier('haar/haarcascade_eye.xml')
     recognizer = cv2.face.EigenFaceRecognizer_create()
     recognizer.read("trainer.yml")
 
@@ -18,13 +19,18 @@ def main():
         #capture frame by frame
         ret, frame = cap.read()
         grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(grey, scaleFactor=1.5, minNeighbors=5)
+        faces = face_cascade.detectMultiScale(grey, scaleFactor=1.2, minNeighbors=5)
+
         for (x, y, w, h) in faces:
             # print(x,y,w,h)
-            roi_grey = grey[y:y+h, x:x+w]
+            roi_gray = grey[y:y+h, x:x+w]
             roi_color = frame[y:y+h, x:x+w]
 
-            id_, conf = recognizer.predict(roi_grey)
+            # eyes = eye_cascade.detectMultiScale(roi_gray)
+            # for (ex,ey,ew,eh) in eyes:
+            #     cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+
+            id_, conf = recognizer.predict(roi_gray)
             if conf>=65 and conf <= 90:
                 print(id_)
                 print(labels[id_])
