@@ -9,7 +9,8 @@ def main():
     recognizer = cv2.face.EigenFaceRecognizer_create()
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    image_dir = os.path.join(base_dir, "images")
+    image_dir = os.path.join(base_dir, "augmented_images")
+    # print(image_dir)
 
     x_train = []
     y_labels = []
@@ -29,17 +30,17 @@ def main():
                 # print(label_ids)
 
                 pil_image = Image.open(path).convert("L") #greyscale
-                size = (300, 300)
+                size = (250, 250)
                 final_image = pil_image.resize(size, Image.ANTIALIAS)
                 
                 image_array = np.array(final_image, "uint8")
                 # print(image_array)
                 faces = face_cascade.detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5)
 
-                for (x, y, w, h) in faces:
-                    roi = image_array[y:y+h, x:x+w]
-                    x_train.append(roi)
-                    y_labels.append(id_)
+                # for (x, y, w, h) in faces:
+                    # roi = image_array[y:y+h, x:x+w]
+                x_train.append(image_array)
+                y_labels.append(id_)
 
     # print(y_labels)
     # print(x_train)
