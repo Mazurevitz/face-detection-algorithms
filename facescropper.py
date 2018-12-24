@@ -4,6 +4,7 @@ import math
 from operator import itemgetter
 from matplotlib import pyplot as plt
 import cv2
+import numpy as np
 
 eye_cascade = cv2.CascadeClassifier('haar/haarcascade_eye.xml')
 eyes_number = 2
@@ -15,7 +16,7 @@ def rotation_matrix_from_eyes(face_image, w, h):
     else:
         rotation = 0
 
-    print('rotation', rotation)
+    print('first rotation', rotation)
     eye_ctr = 0
     for (ex,ey,ew,eh) in eyes:
         eye_ctr += 1
@@ -30,13 +31,17 @@ def rotation_matrix_from_eyes(face_image, w, h):
             rotation = 180 + rotation
             print('<0 new rotation: ', rotation)
 
-        if (rotation > 10):
+        if (rotation > 20):
             rotation = rotation - 180
-            print('>20 new rotation: ', rotation)
+            print('>20 - 180 new rotation: ', rotation)
 
-        if (rotation > 15):
+        if (rotation > 20):
             rotation = 0
-            print('>15 new rotation: ', rotation)
+            print('>20 = 0 new rotation: ', rotation)
+        
+        if (math.fabs(rotation) > 20):
+            rotation = 0
+            print("abs new rotation ", rotation)
 
     M = cv2.getRotationMatrix2D((w/2, h/2), rotation, 1.0)
     return M
@@ -49,11 +54,46 @@ def get_angle_between_eyes(eyes):
 
 def select_and_crop_eyes(face_image, crop_by_number):
     eyes = eye_cascade.detectMultiScale(face_image, scaleFactor=1.1, minNeighbors=7)
+    print('Found {0} eyes!'.format(len(eyes)))
     eyes = sorted(eyes, key=itemgetter(2))
     return eyes[-crop_by_number:]
 
-def normalize_image(gray_image, ):
-    eq_histogram_image = cv2.equalizeHist(gray_image)
+# def detect_color(image):
+#     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    
+#     lower = np.array([0, 48, 80])
+#     upper = np.array([20, 255, 255])
+    
+#     converted = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+#     skinMask = cv2.inRange(converted, lower, upper)
+ 
+# 	# apply a series of erosions and dilations to the mask
+# 	# using an elliptical kernel
+#     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+#     skinMask = cv2.erode(skinMask, kernel, iterations = 2)
+#     skinMask = cv2.dilate(skinMask, kernel, iterations = 2)
+ 
+# 	# blur the mask to help remove noise, then apply the
+# 	# mask to the frame
+#     skinMask = cv2.GaussianBlur(skinMask, (3, 3), 0)
+#     skin = cv2.bitwise_and(image, image, mask = skinMask)
+ 
+# 	# show the skin in the image along with the mask
+
+#     cv2.imshow("skin", skin)
+
+#     cv2.imshow('frame',image)
+#     # color = ('b','g','r')
+#     # for i,col in enumerate(color):
+#     #     histr = cv2.calcHist([image],[i],None,[256],[0,256])
+#     #     plt.plot(histr,color = col)
+#     #     plt.xlim([0,256])
+#     # plt.show()
+
+#     return skin
+
+    # cv2.imshow('mask',mask)
+    # cv2.imshow('res',res)
 
 
 def main():
@@ -72,13 +112,19 @@ def main():
                 # print(path)
 
                 IMG = cv2.imread(path)
+                cv2.imshow('before cutout', IMG)
+
+                # IMG = detect_color(IMG)
+                cv2.imshow('after cutout', IMG)
+                # print("cutout show!")
+
                 IMG_copy = cv2.imread(path)
                 width, height = IMG.shape[:2]
                 # print("width: {0}, height{1}".format(width, height))
 
                 gray = cv2.cvtColor(IMG, cv2.COLOR_BGR2GRAY)
                 faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-                # print ("Found {0} faces!".format(len(faces)))
+                print ("Found {0} faces!".format(len(faces)))
 
                 # Draw a rectangle around the faces
                 for (x,y,w,h) in faces:
@@ -95,7 +141,7 @@ def main():
                     rotation_matrix = rotation_matrix_from_eyes(roi_color, w, h)
 
                     roi_gray_warped = cv2.warpAffine(roi_gray, rotation_matrix, (250, 250))
-                    img_warped = cv2.warpAffine(IMG_copy, rotation_matrix, (width, height))
+                    img_warped = cv2.warpAffine(IMG_copy, rotation_matrix, (height, width))
                     # print("M: {0}, w: {1}, h: {2}".format(rotation_matrix, w, h))
 
                     new_warped = cv2.cvtColor(img_warped, cv2.COLOR_BGR2GRAY)
@@ -105,16 +151,17 @@ def main():
                         cv2.rectangle(img_warped,(x,y),(x+w,y+h),(255,0,0),2)
                         new_roi_gray_warped = new_warped[y:y+h, x:x+w]
                         new_roi_gray_warped = cv2.resize(new_roi_gray_warped, (250,250))
+                        cv2.fastNlMeansDenoising(new_roi_gray_warped, new_roi_gray_warped)
                         new_roi_gray_warped = cv2.blur(new_roi_gray_warped,(5,5))
 
                         eq_histogram_image = cv2.equalizeHist(new_roi_gray_warped)
 
-                        # plt.hist(IMG.ravel(),256,[0,256], label="color")
-                        # plt.hist(roi_gray.ravel(),256,[0,256], label="grey")
-                        # plt.hist(eq_histogram_image.ravel(),256,[0,256], label="normalized histogram")
-                        # plt.legend()
+                        plt.hist(IMG.ravel(),256,[0,256], label="color")
+                        plt.hist(roi_gray.ravel(),256,[0,256], label="grey")
+                        plt.hist(eq_histogram_image.ravel(),256,[0,256], label="normalized histogram")
+                        plt.legend()
 
-                # print("file: {0}".format(file))
+                print("file: {0}".format(file))
                 dirname = root.split(os.path.sep)[-1]
                 # print("directory : {0}, root: {1}".format(dirname, base_dir))
                 joined = ".".join([file, "jpg"])
@@ -130,14 +177,14 @@ def main():
                 print("progress: {0}/{1}".format(progress, 50))
                 progress += 1
 
-                # cv2.imshow('1.original', IMG_copy)
-                # cv2.imshow('2.face that was found', roi_color)
-                # cv2.imshow('3.face in grey', roi_gray)
-                # cv2.imshow('4.after rotation', roi_gray_warped)
-                # cv2.imshow('5.warped original', img_warped)
-                # cv2.imshow('6.after rotation', new_roi_gray_warped)
-                # cv2.imshow('7.after normalization', eq_histogram_image)
-                # plt.show()
+                cv2.imshow('1.original', IMG_copy)
+                cv2.imshow('2.face that was found', roi_color)
+                cv2.imshow('3.face in grey', roi_gray)
+                cv2.imshow('4.after rotation', roi_gray_warped)
+                cv2.imshow('5.warped original', img_warped)
+                cv2.imshow('6.after rotation', new_roi_gray_warped)
+                cv2.imshow('7.after normalization', eq_histogram_image)
+                plt.show()
 
                 cv2.waitKey(0)
 

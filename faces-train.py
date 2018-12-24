@@ -7,6 +7,7 @@ import cv2
 def main():
     face_cascade = cv2.CascadeClassifier('haar/haarcascade_frontalface_alt2.xml')
     recognizer = cv2.face.EigenFaceRecognizer_create()
+    # recognizer = cv2.face.LBPHFaceRecognizer_create()
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     image_dir = os.path.join(base_dir, "augmented_images")

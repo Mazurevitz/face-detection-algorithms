@@ -4,16 +4,18 @@ import pickle
 from math import log1p
 
 def main():
-    cap = cv2.VideoCapture("emily-test.mp4")
+    video_name = "redmaine-eddie-cumber"
+    cap = cv2.VideoCapture("videos/{0}.mp4".format(video_name))
 
     face_cascade = cv2.CascadeClassifier('haar/haarcascade_frontalface_alt2.xml')
     eye_cascade = cv2.CascadeClassifier('haar/haarcascade_eye.xml')
 
-    recognizer = cv2.face.EigenFaceRecognizer_create()
+    # recognizer = cv2.face.EigenFaceRecognizer_create()
+    recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.read("trainer.yml")
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,360))
+    out = cv2.VideoWriter("_".join([video_name,'output2.avi']),fourcc, 20.0, (640,360))
 
     labels = {}
     with open("labels.pickle", 'rb') as f:
@@ -63,9 +65,13 @@ def main():
 
 
         #display resulting frame
-        cv2.imshow('frame', frame)
+        # cv2.imshow('frame', frame)
         out.write(frame)
         if cv2.waitKey(20) & 0xFF == ord('q'):
+            cap.release()
+            out.release()
+            cv2.destroyAllWindows()
+
             break
 
     cap.release()
