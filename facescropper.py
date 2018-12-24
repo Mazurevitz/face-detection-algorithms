@@ -21,9 +21,9 @@ def rotation_matrix_from_eyes(face_image, w, h):
     for (ex,ey,ew,eh) in eyes:
         eye_ctr += 1
         # print('eye/w = ',ew/w)
-        if(ew/w < 0.5):
-            cv2.rectangle(face_image,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
-            cv2.circle(face_image, (math.floor(ex+ew/2),math.floor(ey+eh/2)),(5),(0,0,255),2)
+        # if(ew/w < 0.5):
+        #     cv2.rectangle(face_image,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+        #     cv2.circle(face_image, (math.floor(ex+ew/2),math.floor(ey+eh/2)),(5),(0,0,255),2)
         # print('eye_ctr: ', eye_ctr)
 
     if len(eyes) > 1:
@@ -58,39 +58,39 @@ def select_and_crop_eyes(face_image, crop_by_number):
     eyes = sorted(eyes, key=itemgetter(2))
     return eyes[-crop_by_number:]
 
-# def detect_color(image):
-#     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+def detect_color(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     
-#     lower = np.array([0, 48, 80])
-#     upper = np.array([20, 255, 255])
+    lower = np.array([0, 48, 80])
+    upper = np.array([20, 255, 255])
     
-#     converted = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-#     skinMask = cv2.inRange(converted, lower, upper)
+    converted = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    skinMask = cv2.inRange(converted, lower, upper)
  
-# 	# apply a series of erosions and dilations to the mask
-# 	# using an elliptical kernel
-#     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-#     skinMask = cv2.erode(skinMask, kernel, iterations = 2)
-#     skinMask = cv2.dilate(skinMask, kernel, iterations = 2)
+	# apply a series of erosions and dilations to the mask
+	# using an elliptical kernel
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+    skinMask = cv2.erode(skinMask, kernel, iterations = 2)
+    skinMask = cv2.dilate(skinMask, kernel, iterations = 2)
  
-# 	# blur the mask to help remove noise, then apply the
-# 	# mask to the frame
-#     skinMask = cv2.GaussianBlur(skinMask, (3, 3), 0)
-#     skin = cv2.bitwise_and(image, image, mask = skinMask)
+	# blur the mask to help remove noise, then apply the
+	# mask to the frame
+    skinMask = cv2.GaussianBlur(skinMask, (3, 3), 0)
+    skin = cv2.bitwise_and(image, image, mask = skinMask)
  
-# 	# show the skin in the image along with the mask
+	# show the skin in the image along with the mask
 
-#     cv2.imshow("skin", skin)
+    cv2.imshow("skin", skin)
 
-#     cv2.imshow('frame',image)
-#     # color = ('b','g','r')
-#     # for i,col in enumerate(color):
-#     #     histr = cv2.calcHist([image],[i],None,[256],[0,256])
-#     #     plt.plot(histr,color = col)
-#     #     plt.xlim([0,256])
-#     # plt.show()
+    cv2.imshow('frame',image)
+    # color = ('b','g','r')
+    # for i,col in enumerate(color):
+    #     histr = cv2.calcHist([image],[i],None,[256],[0,256])
+    #     plt.plot(histr,color = col)
+    #     plt.xlim([0,256])
+    # plt.show()
 
-#     return skin
+    return skin
 
     # cv2.imshow('mask',mask)
     # cv2.imshow('res',res)
@@ -128,7 +128,7 @@ def main():
 
                 # Draw a rectangle around the faces
                 for (x,y,w,h) in faces:
-                    cv2.rectangle(IMG,(x,y),(x+w,y+h),(255,0,0),2)
+                    # cv2.rectangle(IMG,(x,y),(x+w,y+h),(255,0,0),2)
 
                     roi_gray = gray[y:y+h, x:x+w]
                     roi_color = IMG[y:y+h, x:x+w]
@@ -148,7 +148,7 @@ def main():
                     faces_warped = face_cascade.detectMultiScale(new_warped, scaleFactor=1.1, minNeighbors=5)
 
                     for (x,y,w,h) in faces_warped:
-                        cv2.rectangle(img_warped,(x,y),(x+w,y+h),(255,0,0),2)
+                        # cv2.rectangle(img_warped,(x,y),(x+w,y+h),(255,0,0),2)
                         new_roi_gray_warped = new_warped[y:y+h, x:x+w]
                         new_roi_gray_warped = cv2.resize(new_roi_gray_warped, (250,250))
                         cv2.fastNlMeansDenoising(new_roi_gray_warped, new_roi_gray_warped)

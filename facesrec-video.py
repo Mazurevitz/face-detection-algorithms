@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import pickle
 from math import log1p
+import os.path 
 
 def main():
     video_name = "redmaine-eddie-cumber"
@@ -15,7 +16,10 @@ def main():
     recognizer.read("trainer.yml")
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter("_".join([video_name,'output2.avi']),fourcc, 20.0, (640,360))
+    
+    video_name = "_".join([video_name, 'output2.avi'])
+    output_destination = os.path.join("output-video", video_name)
+    out = cv2.VideoWriter(output_destination, fourcc, 20.0, (640, 360))
 
     labels = {}
     with open("labels.pickle", 'rb') as f:
