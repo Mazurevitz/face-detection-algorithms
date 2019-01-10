@@ -104,6 +104,3 @@ CHANGELOG.temp
 .vscode/launch.json
 .vscode/settings.json
 /images_copy
-/augmented_images
-/images
-*.yml
