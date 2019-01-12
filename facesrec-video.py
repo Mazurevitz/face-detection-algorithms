@@ -6,6 +6,7 @@ import os.path
 from matplotlib import pyplot as plt
 import matplotlib.patches as mpatches
 import time
+from sklearn.preprocessing import scale
 
 default_color = (255, 255, 255)
 correctly_recognized_color = (0, 255, 0)
@@ -61,8 +62,37 @@ def get_recognition_color(detected_name, actual_name, current_frame, starting_fr
 #     if(frame > 417 and frame < 651):
 #         color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 521, 755, x, y, 260, 75, width, height)
 
+def regressor_to_classifier(predictions, threshold = 0.5):
+    output = []
+    for prediction in predictions:
+        if prediction is not None and prediction < threshold: 
+            output.append(1)
+        else: 
+            output.append(0)
+    return output
+
+def confusion_matrix(true, predictions):
+    TP = 0
+    FP = 0
+    TN = 0
+    FN = 0
+    for t, p in zip(true, predictions):
+        if t == 1 and p == 1: 
+            TP += 1
+        elif t == 0 and p == 1:
+            FP += 1
+        elif t == 1 and p == 0:  
+            FN += 1
+        else: 
+            TN += 1
+    print("TP = {}\nFP = {}\nTN = {}\nFN = {}".format(TP, FP, TN, FN))
+    print("Precision = {}".format(str(TP / (TP + FP))))
+    print("Recall = {}".format(str(TP / (FN + TP))))
+    return TP, FP, TN, FN
+
+
 def main():
-    video_name = "redmaine-eddie-cumber-short-cut"
+    video_name = "redmaine-eddie-cumber-very-short-cut"
     cap = cv2.VideoCapture("videos/{0}.mp4".format(video_name))
 
     current_frame = 0
@@ -93,10 +123,11 @@ def main():
 
     recognition_frame = [0 for x in range(video_length_frames+1)]
     recognition_values = [0 for x in range(video_length_frames+1)]
+    true = [0 for x in range(video_length_frames+1)]
 
-    plt.figure(figsize=(15,5), dpi=120)
-    plt.xlim(0, video_length_frames)
-    plt.ylim(10000, 15000)
+    # plt.figure(figsize=(15,5), dpi=120)
+    # plt.xlim(0, video_length_frames)
+    # plt.ylim(10000, 15000)
 
     badly_recognized = 0
     not_a_face = 0
@@ -113,7 +144,8 @@ def main():
         if not ret:
             break
 
-        print("frame: {0}/{1}".format(current_frame, video_length_frames))
+        if current_frame % 15 == 0:
+            print("frame: {0}/{1}".format(current_frame, video_length_frames))
         current_frame += 1
         current_frame_text = "current frame: {0}/{1}".format(current_frame, video_length_frames)
         cv2.putText(frame, current_frame_text, (20, 340), font,
@@ -122,7 +154,7 @@ def main():
         faces = face_cascade.detectMultiScale(
             gray, scaleFactor=1.1, minNeighbors=5)
         
-        conf = 0
+        conf = None
         recognition_values[current_frame] = conf
 
         for (x, y, w, h) in faces:
@@ -143,15 +175,24 @@ def main():
             # print(labels[id_])
             name = labels[id_]
 
-            if(current_frame > 0 and current_frame < 238):
-                color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 238, x, y, 290, 70, width, height)
+            if(current_frame > 0 and current_frame < 49):
+                color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 49, x, y, 290, 70, width, height)
 
-            elif(current_frame > 238 and current_frame < 416):
-                color = get_recognition_color(name, "eddie-redmaine", current_frame, 238, 416, x, y, 240, 70, width, height)
+            elif(current_frame > 50 and current_frame < 99):
+                color = get_recognition_color(name, "eddie-redmaine", current_frame, 50, 99, x, y, 240, 70, width, height)
 
-            elif(current_frame > 417 and current_frame < 651):
-                color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 417, 651, x, y, 260, 75, width, height)
+            elif(current_frame > 100 and current_frame < 150):
+                color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 100, 149, x, y, 260, 75, width, height)
 
+            # if(current_frame > 0 and current_frame < 238):
+            #     color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 238, x, y, 290, 70, width, height)
+
+            # if(current_frame > 238 and current_frame < 416):
+            #     color = get_recognition_color(name, "eddie-redmaine", current_frame, 343, 520, x, y, 240, 70, width, height)
+
+            # if(current_frame > 417 and current_frame < 651):
+            #     color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 521, 755, x, y, 260, 75, width, height)
+ 
 
 
 
@@ -172,19 +213,22 @@ def main():
             end_coord_x = x + w
             end_coord_y = y + h
             cv2.rectangle(frame, (x, y), (end_coord_x,
-                                          end_coord_y), color, stroke)
+                                        end_coord_y), color, stroke)
 
         recognition_frame[current_frame] = current_frame
         recognition_values[current_frame] = conf
         if color == not_recognized_color:
             badly_recognized += 1
-            plt.axvspan(current_frame, current_frame+1, facecolor='red', alpha=0.3, label="badly recognized")
+            # plt.axvspan(current_frame, current_frame+1, facecolor='red', alpha=0.3, label="badly recognized")
 
         elif color == default_color:
             not_a_face += 1
-            plt.axvspan(current_frame, current_frame+1, facecolor='darkorange', alpha=0.3, label="not a face")
-        elif conf == 0:
-            plt.axvspan(current_frame, current_frame+1, facecolor='black', alpha=0.3, label="no face detected")
+            # plt.axvspan(current_frame, current_frame+1, facecolor='darkorange', alpha=0.3, label="not a face")
+        if color == correctly_recognized_color:
+            true[current_frame] = 1
+        if conf is None:
+            # plt.axvspan(current_frame, current_frame+1, facecolor='gray', label="no face detected")
+            a = 1
 
 
 
@@ -196,6 +240,32 @@ def main():
             out.release()
             cv2.destroyAllWindows()
             break
+
+    recognition_values.pop(0)
+    recognition_frame.pop(0)
+
+    x_roc = []
+    y_roc = []
+
+    min_rec_val = int(min(x for x in recognition_values if x is not None)) + 1
+    max_rec_val = int(max(x for x in recognition_values if x is not None)) - 1
+    for threshold in range(min_rec_val, max_rec_val):
+        print("threshold: {0} ".format(threshold))
+
+        bool_predictions = regressor_to_classifier(recognition_values, threshold)
+        TP, FP, TN, FN = confusion_matrix(true, bool_predictions)
+        TPR = TP / (TP + FN)
+        FPR = FP / (FP + TN)
+        x_roc.append(FPR)
+        y_roc.append(TPR)
+
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.plot(x_roc, y_roc)
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Curve")
+    plt.savefig('ROC_Curve_{0}'.format("w_denoise"), bbox_inches='tight')
+    plt.show()
     
     end = time.time()
     print(end - start)
@@ -204,13 +274,15 @@ def main():
                   round(not_a_face/video_length_frames, 3),
                   round((video_length_frames-not_a_face-badly_recognized)/video_length_frames, 3)))
 
-    plt.plot(recognition_frame, recognition_values, label="confidence")
+    # normalized_recongition_values = recognition_values / np.linalg.norm(recognition_values) * 100
+    # plt.plot(recognition_frame, recognition_values, label="confidence")
     red_patch = mpatches.Patch(color='red', alpha=0.3, label='Wrong recognition')
-    orange_patch = mpatches.Patch(color='darkorange', alpha=0.3, label='Not a face')
-    black_patch = mpatches.Patch(color='black', alpha=0.3, label='No face detected')
-    plt.legend(handles=[red_patch, orange_patch, black_patch])
-    plt.savefig('performance_{0}.{1}'.format(video_name, 'jpg'), bbox_inches='tight')
-    plt.show()
+    orange_patch = mpatches.Patch(color='darkorange', alpha=0.3, label='False Positive')
+    black_patch = mpatches.Patch(color='gray', label='No face detected')
+    white_patch = mpatches.Patch(color='white', label='Correct detection')
+    # plt.legend(handles=[red_patch, orange_patch, black_patch, white_patch])
+    # plt.savefig('performance_{0}.{1}'.format(video_name, 'jpg'), bbox_inches='tight')
+    # plt.show()
     cap.release()
     out.release()
     cv2.destroyAllWindows()
