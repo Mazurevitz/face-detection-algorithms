@@ -92,7 +92,7 @@ def confusion_matrix(true, predictions):
 
 
 def main():
-    video_name = "redmaine-eddie-cumber-very-short-cut"
+    video_name = "redmaine-eddie-cumber-short-cut"
     cap = cv2.VideoCapture("videos/{0}.mp4".format(video_name))
 
     current_frame = 0
@@ -175,23 +175,23 @@ def main():
             # print(labels[id_])
             name = labels[id_]
 
-            if(current_frame > 0 and current_frame < 49):
-                color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 49, x, y, 290, 70, width, height)
+            # if(current_frame > 0 and current_frame < 49):
+            #     color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 49, x, y, 290, 70, width, height)
 
-            elif(current_frame > 50 and current_frame < 99):
-                color = get_recognition_color(name, "eddie-redmaine", current_frame, 50, 99, x, y, 240, 70, width, height)
+            # elif(current_frame > 50 and current_frame < 99):
+            #     color = get_recognition_color(name, "eddie-redmaine", current_frame, 50, 99, x, y, 240, 70, width, height)
 
-            elif(current_frame > 100 and current_frame < 150):
-                color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 100, 149, x, y, 260, 75, width, height)
+            # elif(current_frame > 100 and current_frame < 150):
+            #     color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 100, 149, x, y, 260, 75, width, height)
 
-            # if(current_frame > 0 and current_frame < 238):
-            #     color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 238, x, y, 290, 70, width, height)
+            if(current_frame > 0 and current_frame < 238):
+                color = get_recognition_color(name, "bryan-cranston", current_frame, 0, 238, x, y, 290, 70, width, height)
 
-            # if(current_frame > 238 and current_frame < 416):
-            #     color = get_recognition_color(name, "eddie-redmaine", current_frame, 343, 520, x, y, 240, 70, width, height)
+            if(current_frame > 238 and current_frame < 416):
+                color = get_recognition_color(name, "eddie-redmaine", current_frame, 238, 416, x, y, 240, 70, width, height)
 
-            # if(current_frame > 417 and current_frame < 651):
-            #     color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 521, 755, x, y, 260, 75, width, height)
+            if(current_frame > 417 and current_frame < 651):
+                color = get_recognition_color(name, "benedict-cumberbatch", current_frame, 417, 651, x, y, 260, 75, width, height)
  
 
 
@@ -233,7 +233,7 @@ def main():
 
 
         # display resulting frame
-        # cv2.imshow('frame', frame)
+        cv2.imshow('frame', frame)
         out.write(frame)
         if cv2.waitKey(20) & 0xFF == ord('q'):
             cap.release()
@@ -269,10 +269,15 @@ def main():
     
     end = time.time()
     print(end - start)
-    print("wrongly recognized: {0}%, not a face: {1}%, correct: {2}%"
+
+    only_detected_frames = video_length_frames - not_a_face
+
+    print("wrongly recognized: {0}%, not a face: {1}%, correct: {2}%\nwo no face - bad: {3}%, correct: {4}%"
           .format(round(badly_recognized/video_length_frames, 3),
                   round(not_a_face/video_length_frames, 3),
-                  round((video_length_frames-not_a_face-badly_recognized)/video_length_frames, 3)))
+                  round((video_length_frames-not_a_face-badly_recognized)/video_length_frames, 3),
+                  round(badly_recognized/only_detected_frames, 3),
+                  round((only_detected_frames-badly_recognized)/only_detected_frames, 3)))
 
     # normalized_recongition_values = recognition_values / np.linalg.norm(recognition_values) * 100
     # plt.plot(recognition_frame, recognition_values, label="confidence")

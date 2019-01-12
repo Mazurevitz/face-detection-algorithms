@@ -95,7 +95,7 @@ class DominantColors:
         #display chart
         plt.figure()
         plt.axis("off")
-        plt.imshow(chart)
+        # plt.imshow(chart)
         # plt.show()
 
 
@@ -176,9 +176,9 @@ def detect_color(image):
 
 	# show the skin in the image along with the mask
 
-    cv2.imshow("skin", skin)
+    # cv2.imshow("skin", skin)
 
-    cv2.imshow('frame',image)
+    # cv2.imshow('frame',image)
     # color = ('b','g','r')
     # for i,col in enumerate(color):
     #     histr = cv2.calcHist([image],[i],None,[256],[0,256])
@@ -208,7 +208,7 @@ def cluster_color_show(img):
     res = center[label.flatten()]
     res2 = res.reshape((img.shape))
 
-    cv2.imshow('res2',res2)
+    # cv2.imshow('res2',res2)
 
 def main():
     face_cascade = cv2.CascadeClassifier('haar/haarcascade_frontalface_alt2.xml')
@@ -227,7 +227,7 @@ def main():
                 # print(path)
 
                 IMG = cv2.imread(path)
-                cv2.imshow('before cutout', IMG)
+                # cv2.imshow('before cutout', IMG)
                 
                 green = np.uint8([[[0,255,0 ]]])
                 hsv_green = cv2.cvtColor(green,cv2.COLOR_BGR2HSV)
@@ -250,27 +250,27 @@ def main():
                     roi_gray = gray[y:y+h, x:x+w]
                     roi_color = IMG[y:y+h, x:x+w]
 
-                    cluster_color_show(roi_color)
+                    # cluster_color_show(roi_color)
 
-                    dc = DominantColors(roi_color, clusters)
-                    colors = dc.dominantColors()
-                    print('rgb', colors)
-                    print(colors[0])
+                    # dc = DominantColors(roi_color, clusters)
+                    # colors = dc.dominantColors()
+                    # print('rgb', colors)
+                    # print(colors[0])
 
-                    color_array = np.zeros((1,clusters,3), dtype=int)
-                    color_array[0] = colors
-                    print('color array: ', color_array)
+                    # color_array = np.zeros((1,clusters,3), dtype=int)
+                    # color_array[0] = colors
+                    # print('color array: ', color_array)
 
-                    hsv_colors = cv2.cvtColor(np.uint8(color_array), cv2.COLOR_RGB2HSV)
-                    print('hsv', hsv_colors)
+                    # hsv_colors = cv2.cvtColor(np.uint8(color_array), cv2.COLOR_RGB2HSV)
+                    # print('hsv', hsv_colors)
 
-                    # TEST TEST TEST
-                    color_test = np.zeros((1,1,3), dtype=int)
-                    color_test[0][0] = colors[0]
-                    print('color test: ', color_test)
+                    # # TEST TEST TEST
+                    # color_test = np.zeros((1,1,3), dtype=int)
+                    # color_test[0][0] = colors[0]
+                    # print('color test: ', color_test)
 
-                    hsv_test = cv2.cvtColor(np.uint8(color_test), cv2.COLOR_RGB2HSV)
-                    print('hsv test', hsv_test)
+                    # hsv_test = cv2.cvtColor(np.uint8(color_test), cv2.COLOR_RGB2HSV)
+                    # print('hsv test', hsv_test)
                     # END OF TEST
 
                     # face_cutout = detect_color(roi_color)
